@@ -1,0 +1,51 @@
+name: sl-deploy-app
+
+on: 
+  workflow_dispatch:
+    inputs:
+      environment:
+        type: choice
+        description: Deploy environment
+        required: true        
+        options:
+        - dev
+        - qa
+        - prd
+        - stag
+env:
+  MODULE: validate-code
+
+jobs:
+  
+  application-resources:
+    name: Install Resources
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - name: Checkout Repo
+      uses: actions/checkout@v2
+
+    - name: Install AWS cli
+      run: |
+        curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+        unzip awscliv2.zip
+        sudo ./aws/install --update
+
+    - name: Install Terraform
+      run: |
+        curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
+        sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
+        sudo apt-get update && sudo apt-get install terraform
+
+    - name: Install Ruby
+      run: |
+        sudo apt install ruby-full
+        sudo apt update
+        sudo apt install git curl autoconf bison build-essential libssl-dev libyaml-dev libreadline6-dev zlib1g-dev libncurses5-dev libffi-dev libgdbm6 libgdbm-dev libdb-dev
+        curl -fsSL https://github.com/rbenv/rbenv-installer/raw/HEAD/bin/rbenv-installer | bash
+        echo 'export PATH="$HOME/.rbenv/bin:$PATH"' >> ~/.bashrc
+        echo 'eval "$(rbenv init -)"' >> ~/.bashrc
+        source ~/.bashrc
+        rbenv install -l 2.6.10
+        ruby --version
